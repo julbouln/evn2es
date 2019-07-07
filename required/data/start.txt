@@ -1,0 +1,12 @@
+start  
+	date 1 1 1177 
+	system "Porto Rillia"
+	planet "Ryll"
+	account
+		credits 10000000
+		score 0
+	set "license: Pilot's"
+conversation "intro"
+	`Enter your name` 
+	name 
+	`Go` 

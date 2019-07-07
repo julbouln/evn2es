@@ -1,0 +1,39 @@
+evn2es :
+- fix bug in some PICT conversion
+- asteroids
+- cargo sprites
+- license support
+- system change events support
+- ship variants support
+- balance weapons/outfits
+- interface
+
+Endless Sky missing fonctionnality/required patches :
+Interface:
+- WIP plugin bar segments arg
+- WIP plugin planet description position
+- dynamic interface modification
+- commodities interface bug : limited to maybe 10 commodities
+
+Missions:
+- require ship in missions on offer
+- or require in on offer ?
+OR
+- add "on" trigger for ship and outfit (on buy, on sell ?)
+- missing ship change/rename in mission trigger
+- missing change player position in mission trigger
+- missing random in mission trigger
+- missing move to system
+- missing date change : see DatePostInc
+If this is set to something greater than zero, the game date will be advanced
+by this number of days after successful completion or auto-aborting of the
+mission.
+- no "on_ship_done" trigger
+- no hailing ship/bbs/shipyard/outfitter mission (see job | repeat | boarding | landing)
+
+# Other
+- or conditions for licenses
+- missing government rank
+- pilot's gender
+- wormhole supported but not hypergate?
+- unsupported ammo for primary weapon?

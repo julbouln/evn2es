@@ -1,0 +1,25 @@
+Automatic Escape Velocity Nova data to Endless Sky total conversion
+
+WARNING: this is still work in progress, the total conversion is partially complete
+
+Requirements:
+- ruby (gems: oily_png, memoist, iconv, bindata)
+- imagemagick
+- sox
+- lame
+- Escape Velocity Nova original data (Mac version only)
+
+Note: this script as only been tested on linux
+
+Usage:
+This will convert data into an evn directory.
+$ ./evn2es.rb -i ../EV\ Nova.app/Contents/Resources/Nova\ Files/
+You can now run Endless Sky with the total conversion
+$ endless-sky -r evn
+
+More:
+Use my endless-sky fork including pre rendered rotation to have original isometric sprites :
+https://github.com/julbouln/endless-sky/tree/pre-rendered-rotation
+
+To generate date supported by patch, use the -p argument :
+$ ./evn2es.rb -i ../EV\ Nova.app/Contents/Resources/Nova\ Files/ -p
