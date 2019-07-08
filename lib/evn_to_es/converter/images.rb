@@ -1,3 +1,4 @@
+require 'cicn'
 module EvnToEs
   module Converter
     class Images < Base
@@ -33,6 +34,14 @@ module EvnToEs
 
             FileUtils.mkdir_p "#{conv.images_export_dir}/rled"
             rlec.write("#{conv.images_export_dir}/rled", "%04d" % id)
+          end
+        end
+
+        if false
+          # TODO
+          nova.resources[Nova::Type::CICN].each do |id, res|
+            puts "CICN #{id} #{res[:name]}"
+            Cicn.decode(res[:data])
           end
         end
       end

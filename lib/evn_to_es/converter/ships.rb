@@ -207,7 +207,8 @@ module EvnToEs
               end
 
               entry :engine, 0, 0
-              entry :engine, 0, 0
+
+              ship.shan.print_debug if self.conv.verbose
 
               ship.max_gun.times do |i|
                 entry :gun, ship.shan.gun_pos_x[i] * 2, ship.shan.gun_pos_y[i] * 2

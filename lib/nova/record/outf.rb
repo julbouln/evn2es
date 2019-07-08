@@ -51,7 +51,18 @@ module Nova
             self.mod_type == Nova::Record::Outf::DensityScanner or
             self.mod_type == Nova::Record::Outf::IFF or
             self.mod_type == Nova::Record::Outf::MultiJump or
-            self.mod_type == Nova::Record::Outf::AutoRefueller
+            self.mod_type == Nova::Record::Outf::AutoRefueller or
+            self.mod_type == Nova::Record::Outf::ModifyMaxGuns or
+            self.mod_type == Nova::Record::Outf::ModifyMaxTurrets or
+            self.mod_type == Nova::Record::Outf::RepairSystem or
+            self.mod_type == Nova::Record::Outf::GravityResistance or
+            self.mod_type == Nova::Record::Outf::ResistDeadlyStellars or
+            self.mod_type == Nova::Record::Outf::HyperspaceSpeedMod or
+            self.mod_type == Nova::Record::Outf::HyperspaceDistMod or
+            self.mod_type == Nova::Record::Outf::InterferenceMod or
+            self.mod_type == Nova::Record::Outf::FastJumping or
+            self.mod_type == Nova::Record::Outf::ReinfInhibitor or
+            self.mod_type == Nova::Record::Outf::IFFScrambler
       end
 
       def flags_match(flag)
@@ -113,7 +124,11 @@ module Nova
       enum :InterferenceMod, 24
       enum :Marines, 25
       enum :Ignored, 26
-      enum :IncreaseMaximum, 27
+      enum :IncreaseMaximum, 27 # The ID number of another outfit item, (call it "B") whose
+      # maximum value is to be increased. Item B’s standard maximum will be multiplied by
+      # the number of items the player has that have a ModType of 27 and point to B. If the
+      # player owns no items that modify the maximum of item B, its maximum will be
+      # unchanged.
       enum :MurkModifier, 28
       enum :FasterArmourRecharge, 29
       enum :CloakScanner, 30
@@ -123,19 +138,25 @@ module Nova
       enum :JammingType2, 34
       enum :JammingType3, 35
       enum :JammingType4, 36
-      enum :FastJumping, 37
-      enum :InertialDampener, 38
-      enum :IonDissipater, 39
-      enum :IonAbsorber, 40
+      enum :FastJumping, 37 # (grants carrying ship the ability to enter hyperspace without
+      # slowing down).
+      enum :InertialDampener, 38 # (makes ship inertialess)
+      enum :IonDissipater, 39 # amount of deionization to add. 100 equals 1 point of ion
+      # energy per 1/30th of a second. Higher values yield faster ion charge dissipation.
+      enum :IonAbsorber, 40 # amount of extra ionization capacity to add
       enum :GravityResistance, 41
       enum :ResistDeadlyStellars, 42
       enum :Paint, 43
-      enum :ReinfInhibitor, 44
+      enum :ReinfInhibitor, 44 # a govt class value. any govt with this value in its Class1-4
+      # fields will be prevented from calling in reinforcements while the player is in the
+      # system and has this outfit. setting this field to -1 will inhibit reinforcements for all
+      # ships regardless of govt. note that this outfit will only work when carried by the
+      # player.
       enum :ModifyMaxGuns, 45
       enum :ModifyMaxTurrets, 46
       enum :Bomb, 47
       enum :IFFScrambler, 48
-      enum :RepairSystem, 49
+      enum :RepairSystem, 49 # will occasionally repair the ship when it's disabled
       enum :NonlethalBomb, 50
 
 

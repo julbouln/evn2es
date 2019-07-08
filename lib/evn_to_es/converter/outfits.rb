@@ -48,8 +48,12 @@ module EvnToEs
               cat = "Guns" if outf.flags_match(Nova::Record::Outf::ItemIsFixedGun)
               cat = "Turrets" if outf.flags_match(Nova::Record::Outf::ItemIsTurret)
 
+              #if weap and weap.ammo_type and cat != "Ammunition"
+              #  cat = "Secondary Weapons"
+              #end
+
               unless cat
-                puts "OUTFIT ERROR #{id} #{outf.mod_type}/#{outf.mod_val}" if self.conv.verbose
+                puts "OUTFIT ERROR #{id} #{name} #{outf.mod_type}/#{outf.mod_val}" if self.conv.verbose
                 cat = "Special"
               end
 
@@ -57,7 +61,7 @@ module EvnToEs
                 entry :plural, outf.lc_plural.to_s.truncated
                 entry :thumbnail, self.conv.convert_pict(outf.pict_id, "outfit", "-resize 180x")
                 entry :category, cat
-                entry :mass, 0#outf.mass if outf.mass != 0
+                entry :mass, 0 #outf.mass if outf.mass != 0
                 entry "outfit space", -outf.mass if outf.mass != 0
 
                 entry :cost, outf.cost
@@ -72,7 +76,7 @@ module EvnToEs
                     entry "shield generation", mod.val / 1000.0 if mod.type == Nova::Record::Outf::FasterShieldRecharge
                     entry "hull", mod.val if mod.type == Nova::Record::Outf::Armour
                     entry "thrust", mod.val if mod.type == Nova::Record::Outf::AccelerationBooster
-                    entry "drag", -mod.val/10.0 if mod.type == Nova::Record::Outf::SpeedIncrease
+                    entry "drag", -mod.val / 10.0 if mod.type == Nova::Record::Outf::SpeedIncrease
                     entry "turn", mod.val * outf.mass if outf.mod_type == Nova::Record::Outf::TurnRateChange
                     # Nova::Record::Outf::EscapePod
                     entry "fuel capacity", mod.val if mod.type == Nova::Record::Outf::FuelCapacityIncrease
@@ -80,11 +84,16 @@ module EvnToEs
                     # Nova::Record::Outf::IFF
                     entry "afterburner thrust", mod.val / 100.0 if mod.type == Nova::Record::Outf::Afterburner
                     entry "map", mod.val * 6 if mod.type == Nova::Record::Outf::Map
-                    # Nova::Record::Outf::CloakingDevice
+                    if mod.type == Nova::Record::Outf::CloakingDevice
+                      entry "cloak", 0.01
+                      # entry "cloaking fuel", mod.val & 0x00f0
+                      # missing cloaking shields ? mod.val & 0x0f00
+                    end
+                    #
                     # EV: How many frames per 1 unit of fuel generated. Enter a
                     # negative value to perform the same function in 'fuel sucking' mode
                     # ES: fuel produced per frame.
-                    entry "fuel generation", (1.0/mod.val).round(2) if mod.type == Nova::Record::Outf::FuelScoop
+                    entry "fuel generation", (1.0 / mod.val).round(2) if mod.type == Nova::Record::Outf::FuelScoop
                     # Nova::Record::Outf::AutoRefueller
                     # Nova::Record::Outf::AutoEject
                     # Nova::Record::Outf::CleanLegalRecord
@@ -118,6 +127,18 @@ module EvnToEs
                     # Nova::Record::Outf::NonlethalBomb
                     #
 
+                    if cat == "Ammunition"
+                      entry "#{outf.uniq_name.downcase} capacity", -1
+                    end
+
+                    if weap and weap.ammo_type
+                      if weap.max_ammo > 0
+                        entry "#{weap.ammo_type.ammo_outf.uniq_name.downcase} capacity", weap.max_ammo
+                      else
+                        entry "#{weap.ammo_type.ammo_outf.uniq_name.downcase} capacity", weap.ammo_type.ammo_outf.max_
+                      end
+                    end
+
                     if outf.flags_match(Nova::Record::Outf::ItemCantBeSold)
                       entry :unplunderable, 1
                     end
@@ -126,9 +147,9 @@ module EvnToEs
                       weap = mod.record
                       weap.print_debug if self.conv.verbose
 
-                      if [Nova::Record::Weap::TurretedBeam,Nova::Record::Weap::TurretedUnguided,
+                      if [Nova::Record::Weap::TurretedBeam, Nova::Record::Weap::TurretedUnguided,
                           Nova::Record::Weap::FrontQuadrantTurret, Nova::Record::Weap::RearQuadrantTurret,
-                      Nova::Record::Weap::PointDefenseTurret].include?(weap.guidance)
+                          Nova::Record::Weap::PointDefenseTurret].include?(weap.guidance)
                         #entry "turret mounts", -1
                       else
                         #entry "gun ports", -1
@@ -147,15 +168,39 @@ module EvnToEs
                       entry :weapon do
                         if weap.spin
                           entry "sprite", self.conv.convert_rled(weap.spin.sprites_id, 0, "projectile", "-resize 200%")
+                        else
+
+                          # generate beam sprite
+                          if weap.beam_width > 0 and weap.beam_length > 0
+                            beam_file = "#{self.conv.images_export_dir}/projectile/#{weap.id}.png"
+                            unless File.exist?(beam_file)
+                              col = Nova::Color.to_rgb(weap.beam_color)
+                              #puts "WEAP #{weap.id} #{weap.name} BEAM #{weap.exit_type} #{weap.beam_width} #{weap.beam_length} #{col}"
+                              png = ChunkyPNG::Image.new(weap.beam_width * 2 + 4, weap.beam_length * 2 + 4, ChunkyPNG::Color::TRANSPARENT)
+                              (weap.beam_width * 2).times do |x|
+                                (weap.beam_length * 2).times do |y|
+                                  png[x + 2, y + 2] = ChunkyPNG::Color.rgba(col[0], col[1], col[2], 255)
+                                end
+                              end
+                              png.save(beam_file)
+                            end
+
+                            entry "sprite", "projectile/#{weap.id}"
+                            entry "hardpoint offset", 0, weap.beam_length / 2
+                          end
                         end
 
                         entry :sound, "#{"%05d" % (weap.sound + 200)}"
 
                         if weap.ammo_type
-                          entry :ammo, weap.weap_outf.uniq_name if weap.guidance != Nova::Record::Weap::CarriedShip
+                          entry :ammo, weap.ammo_type.ammo_outf.uniq_name if weap.guidance != Nova::Record::Weap::CarriedShip
 
-                          entry :homing, 4 if weap.guidance == Nova::Record::Weap::Homing
-                          entry :tracking, 1
+                          if weap.guidance == Nova::Record::Weap::Homing
+                            entry :homing, 4
+                            entry :tracking, 1
+                          end
+                          entry :acceleration, 1 if weap.speed > 0
+                          entry :drag, (1 / (weap.speed / 100.0)).round(2) if weap.speed > 0
                         end
 
                         if weap.explosion
@@ -171,9 +216,15 @@ module EvnToEs
                           #entry :submunition, weap.sub_weap.weap_outf.uniq_name, weap.sub_count
                         end
 
+                        # EV: The number of frames it takes for one of this weapon to reload. 30 = 1
+                        # shot/sec. Smaller numbers yield faster reloads.
                         entry "reload", weap.reload * 2
+                        # EV: The number of frames the weapon's shots travel for before they peter out.
+                        # 30 = 1 second of life.
                         entry "lifetime", weap.count_ * 2
+                        # EV: The weapon's speed (pixels per frame * 100).
                         entry "velocity", (weap.speed / 100.0).round if weap.speed > 0
+
                         entry "shield damage", weap.energy_dmg
                         entry "hull damage", weap.mass_dmg
 
@@ -182,15 +233,19 @@ module EvnToEs
                         entry "hit force", weap.impact if weap.impact > 0
                         entry "turret turn", 2.0 if cat == "Turrets"
 
-                        entry "turn", weap.guided_turn/10.0 if weap.guided_turn > 0
+                        entry "turn", weap.guided_turn / 10.0 if weap.guided_turn > 0
 
                         entry "burst count", weap.burst_count if weap.burst_count > 0
                         entry "burst reload", weap.burst_reload if weap.burst_reload > 0
 
                         entry "ion damage", weap.ionization if weap.ionization > 0
 
-                        entry "anti-missile", weap.mass_dmg*2 if weap.guidance == Nova::Record::Weap::PointDefenseBeam
-                        entry "anti-missile", weap.mass_dmg*2 if weap.guidance == Nova::Record::Weap::PointDefenseTurret
+                        # ES does not support outfit that are both turret AND anti-missile
+                        if (weap.guidance == Nova::Record::Weap::PointDefenseTurret or weap.guidance == Nova::Record::Weap::PointDefenseBeam) and
+                            !outf.flags_match(Nova::Record::Outf::ItemIsTurret)
+                          entry "anti-missile", weap.mass_dmg * 2
+                        end
+
                         entry :inaccuracy, weap.inaccuracy / 2
                       end
                     end
