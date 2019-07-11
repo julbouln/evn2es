@@ -21,7 +21,7 @@ module EvnToEs
             # BUG in TradingPanel.cpp, we can't have too many commodity
             if false
               nova.traverse(:junk) do |id, name, junk|
-                junk.print_debug([]) if self.conv.verbose
+                junk.print_debug if self.conv.verbose
                 entry :commodity, name, junk.base_price, (junk.base_price * 1.5).round do
                   entry name
                 end

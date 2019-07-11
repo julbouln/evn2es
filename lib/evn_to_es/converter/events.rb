@@ -1,6 +1,11 @@
+require 'evn_to_es/helper/system'
+require 'evn_to_es/helper/planet'
 module EvnToEs
   module Converter
     class Events < Base
+      include EvnToEs::Helper::System
+      include EvnToEs::Helper::Planet
+
       def convert(nova)
         File.open(conv.data_export_path("events.txt"), 'w') do |file|
           if self.conv.cheat
@@ -9,7 +14,7 @@ module EvnToEs
 
               nova.traverse(:syst) do |id, name, syst|
                 if syst.initially_available
-                  entry "visit", name
+                  entry "visit", syst.shared_name
                 end
               end
 
@@ -37,8 +42,8 @@ module EvnToEs
           nova.traverse(:cron) do |id, name, cron|
             cron.print_debug if self.conv.verbose #([:random, :duration, :enable_on, :on_start, :on_end, :pre_holdoff, :post_holdoff])
             avail_bits = cron.enable_on.to_s.truncated.strip.downcase
-            avail_exp = EvnToEs::TestExpression.new(avail_bits)
 
+            avail_exp = EvnToEs::TestExpression.new(avail_bits)
             has_event = cron.pre_holdoff > 0
             if has_event
               if cron.first_year > 0
@@ -139,69 +144,102 @@ module EvnToEs
             name = "monitor state change #{i}"
             outfitters = {}
             shipyards = {}
+            systs = []
 
             exp = EvnToEs::TestExpression.new(int)
-            conf = self.generate_config :mission, name do
-              entry :landing
-              entry :invisible
-              entry :to, :offer do
-                entry exp
-              end
-              entry :on, :offer do
-                entry :event, "#{name} trigger"
-                entry :fail
+
+            ini_exp = EvnToEs::TestExpression.new(int)
+            ini_exp.set_initial_conditions!
+
+            if false
+            puts "EVENT #{name} #{int} -> #{exp.to_s}"
+            exp.interpretation.each do |i|
+              if i.is_a? Array
+                if i.first == :not
+                  clr = "!#{i.last}"
+                  puts "#{clr}: #{nova.set_tree[clr]}"
+                end
               end
             end
-            conf.write(file)
-
-            ops.each do |t|
-              obj = nova.get(t[:type], t[:id])
-              case t[:type]
-              when :outf
-                unless obj.unsupported
-                  tech = "Tech level #{obj.tech_level}"
-                  outfitters[tech] ||= []
-                  outfitters[tech] << obj.uniq_name
-                end
-              when :ship
-                case t[:test]
-                when :availability
-                  tech = "Tech level #{obj.tech_level}"
-                  shipyards[tech] ||= []
-                  shipyards[tech] << obj.uniq_name
-                when :appear_on
-                end
-              when :syst
-                # TODO
-              when :flet
-                # TODO
-              when :pers
-                # TODO
-              when :oops
-                # TODO
-              end
             end
 
-            conf = self.generate_config :event, "#{name} trigger" do
-              if outfitters.length > 0 or shipyards.length > 0
-                outfitters.each do |tech, outfits|
-                  entry :outfitter, tech do
-                    outfits.each do |outfit|
-                      entry :add, outfit
+            unless ini_exp.resolve_to_true
+              conf = self.generate_config :mission, name do
+                entry :landing
+                entry :invisible
+                entry :to, :offer do
+                  entry exp
+                end
+                entry :on, :offer do
+                  entry :event, "#{name} trigger"
+                  entry :fail
+                end
+              end
+              conf.write(file)
+
+              ops.each do |t|
+                obj = nova.get(t[:type], t[:id])
+                case t[:type]
+                when :outf
+                  unless obj.unsupported
+                    tech = "Tech level #{obj.tech_level}"
+                    outfitters[tech] ||= []
+                    outfitters[tech] << obj.uniq_name
+                  end
+                when :ship
+                  case t[:test]
+                  when :availability
+                    tech = "Tech level #{obj.tech_level}"
+                    shipyards[tech] ||= []
+                    shipyards[tech] << obj.uniq_name
+                  when :appear_on
+                  end
+                when :syst
+                  systs << obj
+                when :flet
+                  # TODO
+                  #puts "FLEET MOD EVENT : #{obj.uniq_name} #{obj.syst.first}"
+                when :pers
+                  # TODO
+                when :oops
+                  # TODO
+                end
+              end
+
+              conf = self.generate_config :event, "#{name} trigger" do
+                if outfitters.length > 0 or shipyards.length > 0
+                  outfitters.each do |tech, outfits|
+                    entry :outfitter, tech do
+                      outfits.each do |outfit|
+                        entry :add, outfit
+                      end
+                    end
+                  end
+                  shipyards.each do |tech, ships|
+                    entry :shipyard, tech do
+                      ships.each do |ship|
+                        entry :add, ship
+                      end
                     end
                   end
                 end
-                shipyards.each do |tech, ships|
-                  entry :shipyard, tech do
-                    ships.each do |ship|
-                      entry :add, ship
+
+                systs.each do |syst|
+                  syst.navs.each do |nav|
+                    if nav and !nav.unsupported
+                      entry :planet, nav.shared_name do
+                        insert self.convert_spob(nova, nav)
+                      end
                     end
+                  end
+                  entry :system, syst.shared_name do
+                    insert self.convert_syst(nova, syst)
                   end
                 end
               end
+              conf.write(file)
+              i += 1
             end
-            conf.write(file)
-            i += 1
           end
         end
       end

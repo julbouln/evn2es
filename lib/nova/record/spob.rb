@@ -8,6 +8,10 @@ module Nova
       has_few :hyperlinks, type: :spob, key: :hyper_link
       has_many :systs, type: :syst, key: :nav
 
+      def spin
+        @files.get(:spin, self.spob_type+1000)
+      end
+
       def bar_desc_id
         @id - 128 + 10000
       end

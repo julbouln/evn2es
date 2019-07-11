@@ -59,6 +59,21 @@ module EvnToEs
               end
 
               entry :attributes do
+                required_licenses = []
+                ship.require.each_with_index do |b,i|
+                  if b and nova.licenses[i]
+                    required_licenses << nova.licenses[i]
+                  end
+                end
+
+                if required_licenses.length > 0
+                  entry :licenses do
+                    required_licenses.each do |l|
+                      entry l
+                    end
+                  end
+                end
+
                 category = "Light Freighter"
 
                 if ship.strength.to_f / ship.mass < 0.25
@@ -219,7 +234,7 @@ module EvnToEs
               end
 
               if ship.explosion1
-                entry :explode, ship.explosion1.uniq_name, 10
+                entry :explode, ship.explosion1.uniq_name, ship.death_delay/5
               end
 
               if ship.explosion2

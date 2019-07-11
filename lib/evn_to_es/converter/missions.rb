@@ -8,13 +8,13 @@ module EvnToEs
           when :stellar
             if key == :system
               syst = pos.last.systs.first
-              entry key, syst.uniq_name if syst.initially_available
+              entry key, syst.shared_name if syst.initially_available
             else
-              entry key, pos.last.uniq_name
+              entry key, pos.last.shared_name
             end
           when :adj_system
             entry key do
-              entry :neighbor, :system, pos.last.uniq_name
+              entry :neighbor, :system, pos.last.shared_name
               entry :distance, 3 if key != :source
             end
           when :government
@@ -111,7 +111,7 @@ module EvnToEs
                 else
                   entry :description, EvnToEs::Description.new(nova, misn.quick_brief, stopover_type: stopover_type) if misn.quick_brief > 0
                 end
-                entry :name, EvnToEs::VarSub.sub(misn.display_name, stopover_type: stopover_type)
+                entry :name, EvnToEs::VarSub.sub(misn.shared_name, stopover_type: stopover_type)
 
                 #if misn.can_abort == 0 and misn.flags_match(Nova::Record::Misn::DontShowArrow)
                 #  entry :invisible
@@ -218,7 +218,7 @@ module EvnToEs
                     npc_syst = misn.resolve_ship_syst
                     case npc_syst.first
                     when :system
-                      entry :system, npc_syst.last.uniq_name if npc_syst.last.initially_available
+                      entry :system, npc_syst.last.shared_name if npc_syst.last.initially_available
                     when :initial_system
                       insert self.generate_position(:system, misn.src)
                     when :travel_system
@@ -261,7 +261,7 @@ module EvnToEs
                     npc_syst = misn.resolve_aux_ship_syst
                     case npc_syst.first
                     when :system
-                      entry :system, npc_syst.last.uniq_name if npc_syst.last.initially_available
+                      entry :system, npc_syst.last.shared_name if npc_syst.last.initially_available
                     when :initial_system
                       insert self.generate_position(:system, misn.src)
                     when :travel_system

@@ -66,7 +66,23 @@ module EvnToEs
 
                 entry :cost, outf.cost
 
+                required_licenses = []
+                outf.require.each_with_index do |b,i|
+                  if b and nova.licenses[i]
+                    required_licenses << nova.licenses[i]
+                  end
+                end
+
+                if required_licenses.length > 0
+                  entry :licenses do
+                    required_licenses.each do |l|
+                      entry l
+                    end
+                  end
+                end
+
                 outf.mods.each do |mod|
+
                   if mod.type != Nova::Record::Outf::None
                     entry "cargo space", mod.val if mod.type == Nova::Record::Outf::MoreCargoSpace
                     entry "shields", mod.val if mod.type == Nova::Record::Outf::MoreShieldCapacity

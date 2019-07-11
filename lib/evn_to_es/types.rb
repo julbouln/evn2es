@@ -179,12 +179,24 @@ module EvnToEs
       @exp.will_never_happen
     end
 
-    def initially_available
-      @exp.initially_available
+    def resolve_to_true
+      @exp.resolve_to_true
     end
 
     def initialize(exp)
       @exp = Nova::TestExpression.new(exp)
+    end
+
+    def set_initial_conditions!
+      @exp.set_initial_conditions!
+    end
+
+    def to_s
+      @exp.to_s
+    end
+
+    def interpretation
+      @exp.interpretation
     end
 
     def rec_write(io, int, level = 0)

@@ -2,8 +2,6 @@ evn2es :
 - fix bug in some PICT conversion
 - asteroids
 - cargo sprites
-- license support
-- system change events support
 - ship variants support
 - balance weapons/outfits
 - interface

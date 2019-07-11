@@ -213,6 +213,17 @@ module Nova
 
     memoize :governments_classes
 
+    def initial_flets
+      flets = []
+      self.traverse(:flet) do |fid, fname, flet|
+        if flet.initially_available
+          flets << flet
+        end
+      end
+      flets
+    end
+    memoize :initial_flets
+
     # extra set
     def set_tree
       tree = {}
@@ -262,6 +273,21 @@ module Nova
         end
       end
     end
+
+    def licenses
+      lic = {}
+      self.traverse(:outf) do |id, name, outf|
+        if name =~ /License/
+          if outf.contribute.select{|b| b}.length == 1
+            lic[outf.contribute.index(true)]=outf.uniq_name.gsub(/\sLicense/,"")
+            #puts "OUTF #{id} #{name} : contribute:#{outf.contribute.reverse.map{|b| b ? "1" : "0"}.join("")}"
+            #puts "OUTF #{id} #{name} : require:#{outf.require.reverse.map{|b| b ? "1" : "0"}.join("")}"
+            end
+        end
+      end
+      lic
+    end
+    memoize :licenses
 
     def mappers
       self.weap_outfit_mapper

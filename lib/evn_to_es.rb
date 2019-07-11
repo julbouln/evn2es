@@ -1,12 +1,6 @@
 require 'nova'
 require 'evn_to_es/converter'
 
-class String
-  def truncated
-    self.sub(/([^\0]*\0).*/, '\1')
-  end
-end
-
 module EvnToEs
   class Convert
     extend Memoist
@@ -45,7 +39,7 @@ module EvnToEs
       dstkey
     end
 
-    def convert_rled_frames(id, frame_start, frame_end, destdir, opt = "")
+    def convert_rled_frames(id, frame_start, frame_end, destdir, opt = "", dest_prefix = nil)
       img_dir = self.images_export_dir
       FileUtils.mkdir_p "#{img_dir}/#{destdir}"
       subdir = "rled"
@@ -55,6 +49,9 @@ module EvnToEs
       (frame_start..frame_end).each do |frame|
         srcfile = "#{img_dir}/#{subdir}/#{"%04d" % (id)}_#{"%03d" % frame}.png"
         dstfile = "#{img_dir}/#{destdir}/#{"%04d" % (id)}-#{i}.png"
+        if dest_prefix
+          dstfile = "#{img_dir}/#{destdir}/#{dest_prefix}-#{i}.png"
+        end
         if File.exists?(srcfile)
           unless File.exists?(dstfile)
             system("convert #{opt} #{srcfile} #{dstfile}")
@@ -122,6 +119,7 @@ module EvnToEs
         # outf.print_debug
         outfitters["Tech level #{outf.tech_level}"] ||= []
         if !outf.unsupported and outf.buy_random.to_i != 0 and outf.initially_available
+          #puts "OUTF #{name} available : #{outf.availability}/#{outf.initially_available}"
           outfitters["Tech level #{outf.tech_level}"] << name
         end
       end
@@ -134,7 +132,7 @@ module EvnToEs
       @export_dir = exp_dir
       @verbose = verbose
       @patched = patched
-      @cheat = false
+      @cheat = true
     end
 
     def convert(files, arg = nil)

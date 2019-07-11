@@ -37,6 +37,14 @@ module EvnToEs
           end
         end
 
+        nova.traverse(:spin) do |id, name, spin|
+          spin.print_debug if self.conv.verbose
+        end
+
+        nova.traverse(:shan) do |id, name, shan|
+          shan.print_debug if self.conv.verbose
+        end
+
         if false
           # TODO
           nova.resources[Nova::Type::CICN].each do |id, res|

@@ -1,5 +1,13 @@
 # https://github.com/aarongough/sexpistol
 require 'strscan'
+require 'truthtable'
+
+class String
+  def truncated
+    self.sub(/([^\0]*\0).*/, '\1')
+  end
+end
+
 module Nova
 
   class ExpressionMissingParentheses < StandardError
@@ -12,7 +20,7 @@ module Nova
 
     def initialize(string)
       unless (string.count('(') == string.count(')'))
-        raise ExpressionMissingParentheses
+        raise ExpressionMissingParentheses, string
       end
       super(string)
     end
@@ -205,7 +213,7 @@ module Nova
     attr_accessor :interpretation
 
     def initialize(exp)
-      @exp = exp.truncated.downcase.strip || ""
+      @exp = exp.downcase.strip || ""
       @exp.gsub!(/\s(\d+[^\d])/, ' b\1') # fix some bug with malformed avail_bits
       self.simplify!
     end

@@ -180,7 +180,7 @@ module Nova
           self.class.name.sub("Nova::Record::", "").downcase.to_sym
         end
 
-        def display_name
+        def shared_name
           self.name.sub(/\;.*/, "")
         end
 
