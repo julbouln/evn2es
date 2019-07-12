@@ -222,6 +222,7 @@ module Nova
       end
       flets
     end
+
     memoize :initial_flets
 
     # extra set
@@ -278,15 +279,18 @@ module Nova
       lic = {}
       self.traverse(:outf) do |id, name, outf|
         if name =~ /License/
-          if outf.contribute.select{|b| b}.length == 1
-            lic[outf.contribute.index(true)]=outf.uniq_name.gsub(/\sLicense/,"")
-            #puts "OUTF #{id} #{name} : contribute:#{outf.contribute.reverse.map{|b| b ? "1" : "0"}.join("")}"
-            #puts "OUTF #{id} #{name} : require:#{outf.require.reverse.map{|b| b ? "1" : "0"}.join("")}"
-            end
+          if outf.contribute.select {|b| b}.length == 1
+            #puts "OUTF #{id} #{name} : contribute:#{outf.contribute.reverse.map {|b| b ? "1" : "0"}.join("")}"
+            #puts "OUTF #{id} #{name} : require:#{outf.require.reverse.map {|b| b ? "1" : "0"}.join("")}"
+            lic[outf.contribute.index(true)] = outf.uniq_name.gsub(/\sLicense/, "")
+          else
+            puts "WARN complex license #{id} #{name} : availability:#{outf.availability} contribute:#{outf.contribute.reverse.map {|b| b ? "1" : "0"}.join("")}"
+          end
         end
       end
       lic
     end
+
     memoize :licenses
 
     def mappers

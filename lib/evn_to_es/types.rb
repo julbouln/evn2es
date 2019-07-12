@@ -35,12 +35,15 @@ module EvnToEs
 
       sub_desc = self.sub_registered(sub_desc)
       sub_desc = self.sub_gender(sub_desc, 1)
+      if options[:initial]
+        sub_desc = self.sub_has_bit(sub_desc, false)
+      end
 
       sub_desc
     end
 
     def self.sub_registered(desc)
-      desc.gsub(/\\\"/, "<DQ>").gsub(/\{[Pp]\s*\"([^\"]+)\"\s+\"([^\"]+)\"\}/, '\1').gsub(/<DQ>/, "\\\"")
+      desc.gsub(/\\\"/, "<DQ>").gsub(/\{[Pp]\d+\s*\"([^\"]+)\"\s+\"([^\"]+)\"\}/, '\1').gsub(/<DQ>/, "\\\"")
     end
 
     def self.sub_gender(desc, m)

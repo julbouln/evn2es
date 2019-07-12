@@ -27,12 +27,16 @@ module EvnToEs
             conf = self.generate_config :ship, name do
               #puts "SHIP \"#{name}\" \"#{ship.long_name.to_s}\" \"#{ship.sub_title}\""
               #entry :name, ship.comm_name.to_s
-              if self.conv.patched
-                entry :sprite, self.conv.convert_rled_frames(ship.shan.base_image_id, 0, ship.shan.frames_per - 1, "ship", "-resize 200%") do
-                  entry "pre rendered rotation", ship.shan.frames_per.to_i
+              if ship.shan
+                if self.conv.patched
+                  entry :sprite, self.conv.convert_rled_frames(ship.shan.base_image_id, 0, ship.shan.frames_per - 1, "ship", "-resize 200%") do
+                    entry "pre rendered rotation", ship.shan.frames_per.to_i
+                  end
+                else
+                  entry :sprite, conv.convert_rled(ship.shan.base_image_id, ship.shan.frames_per / 2, "ship", "-rotate \"180\" -resize 200%")
                 end
               else
-                entry :sprite, conv.convert_rled(ship.shan.base_image_id, ship.shan.frames_per / 2, "ship", "-rotate \"180\" -resize 200%")
+                puts "ERROR #{ship.id} #{ship.name} no shan"
               end
               if pict_id
                 entry :thumbnail, "pict/#{"%05d" % (pict_id)}"
@@ -60,7 +64,7 @@ module EvnToEs
 
               entry :attributes do
                 required_licenses = []
-                ship.require.each_with_index do |b,i|
+                ship.require.each_with_index do |b, i|
                   if b and nova.licenses[i]
                     required_licenses << nova.licenses[i]
                   end
@@ -93,6 +97,10 @@ module EvnToEs
                   if ship.mass > 500
                     category = "Heavy Warship"
                   end
+                end
+
+                if nova.ids_from_name(:outf, ship.name)
+                  category = "Fighter"
                 end
 
                 entry :category, category
@@ -166,16 +174,20 @@ module EvnToEs
                 entry "jump speed", 0.2
                 entry "jump fuel", 100
 
-                if ship.shan.glow_image_id > -1
-                  if self.conv.patched
-                    entry "flare sprite", conv.convert_rled_frames(ship.shan.glow_image_id, 0, ship.shan.frames_per - 1, "flare", "-resize 200%") do
-                      entry "pre rendered rotation", ship.shan.frames_per.to_i
+                if ship.shan
+                  if ship.shan.glow_image_id > -1
+                    if self.conv.patched
+                      entry "flare sprite", conv.convert_rled_frames(ship.shan.glow_image_id, 0, ship.shan.frames_per - 1, "flare", "-resize 200%") do
+                        entry "pre rendered rotation", ship.shan.frames_per.to_i
+                      end
+                    else
+                      entry "flare sprite", conv.convert_rled(ship.shan.glow_image_id, ship.shan.frames_per / 2, "flare", "-rotate \"180\" -resize 200%")
                     end
-                  else
-                    entry "flare sprite", conv.convert_rled(ship.shan.glow_image_id, ship.shan.frames_per / 2, "flare", "-rotate \"180\" -resize 200%")
-                  end
 
-                  entry "flare sound", "00602"
+                    entry "flare sound", "00602"
+                  end
+                else
+                  puts "ERROR #{ship.id} #{ship.name} no shan"
                 end
 
                 entry :weapon do
@@ -223,18 +235,22 @@ module EvnToEs
 
               entry :engine, 0, 0
 
-              ship.shan.print_debug if self.conv.verbose
+              if ship.shan
+                ship.shan.print_debug if self.conv.verbose
 
-              ship.max_gun.times do |i|
-                entry :gun, ship.shan.gun_pos_x[i] * 2, ship.shan.gun_pos_y[i] * 2
-              end
+                ship.max_gun.times do |i|
+                  entry :gun, ship.shan.gun_pos_x[i] * 2, ship.shan.gun_pos_y[i] * 2
+                end
 
-              ship.max_tur.times do |i|
-                entry :turret, ship.shan.turret_pos_x[i] * 2, ship.shan.turret_pos_y[i] * 2
+                ship.max_tur.times do |i|
+                  entry :turret, ship.shan.turret_pos_x[i] * 2, ship.shan.turret_pos_y[i] * 2
+                end
+              else
+                puts "ERROR #{ship.id} #{ship.name} no shan"
               end
 
               if ship.explosion1
-                entry :explode, ship.explosion1.uniq_name, ship.death_delay/5
+                entry :explode, ship.explosion1.uniq_name, ship.death_delay / 5
               end
 
               if ship.explosion2
@@ -242,7 +258,7 @@ module EvnToEs
               end
 
               if desc_id
-                entry :description, EvnToEs::Description.new(nova, desc_id)
+                entry :description, EvnToEs::Description.new(nova, desc_id, initial: true)
               end
 
             end

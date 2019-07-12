@@ -213,8 +213,8 @@ module Nova
     attr_accessor :interpretation
 
     def initialize(exp)
-      @exp = exp.downcase.strip || ""
-      @exp.gsub!(/\s(\d+[^\d])/, ' b\1') # fix some bug with malformed avail_bits
+      @exp = exp.sub(/^\0/, "").downcase.strip || ""
+      @exp = @exp.gsub(/\s(\d+[^\d])/, ' b\1').gsub(/^(\d+[^\d])/, 'b\1') # fix some bug with malformed avail_bits
       self.simplify!
     end
 
@@ -246,7 +246,15 @@ module Nova
 
     def truth_table
       local_exp = @exp
-      TruthTable.new {local_exp.length > 0 ? eval(local_exp) : true}
+      begin
+        TruthTable.new {local_exp.length > 0 ? eval(local_exp) : true}
+      rescue SyntaxError => se
+        puts "ERROR TestExpression syntax error #{local_exp}"
+        TruthTable.new {false}
+      rescue
+        puts "ERROR TestExpression invalid #{local_exp}"
+        TruthTable.new {false}
+      end
     end
 
     def will_never_happen

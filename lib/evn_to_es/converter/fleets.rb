@@ -47,15 +47,28 @@ module EvnToEs
 
                         entry flet.lead_ship.uniq_name, 1
 
+                        flet.lead_ship.fighters.each do |fighter|
+                          entry *fighter
+                        end
+
                         if cnts_i[i] and cnts_i[i] > 0
                           sh = nova.get(:ship, shid_i)
                           entry sh.uniq_name, cnts_i[i]
+
+                          sh.fighters.each do |fighter|
+                            entry *fighter
+                          end
                         end
                         variants_h.each do |shid, cnts|
                           if shid_i != shid
                             if cnts[i] and cnts[i] > 0
                               sh = nova.get(:ship, shid)
                               entry sh.uniq_name, cnts[i]
+
+                              sh.fighters.each do |fighter|
+                                entry *fighter
+                              end
+
                             end
                           end
                         end
@@ -105,6 +118,9 @@ module EvnToEs
                 if ship
                   entry :variant, ship.prob do
                     entry ship.uniq_name, 1
+                    ship.fighters.each do |fighter|
+                      entry *fighter
+                    end
                   end
                 end
               end

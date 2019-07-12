@@ -38,6 +38,18 @@ module Nova
         self.outfs1 + self.outfs2
       end
 
+      def fighters
+        fs = []
+        self.ammos.each do |ammo|
+          if ammo and ammo.ammo_outf
+            if @files.ids_from_name(:ship, ammo.ammo_outf.name)
+              fs << [ammo.ammo_outf.name, ammo.count]
+            end
+          end
+        end
+        fs
+      end
+
       def desc_id
         @id - 128 + 13000
       end

@@ -68,7 +68,7 @@ module Nova
           define_method(:set_expressions) do
             exps = {}
             keys.each do |k|
-              exps[k] = Nova::SetExpression.new(self.send(k).to_s.truncated.strip.downcase, @files)
+              exps[k] = Nova::SetExpression.new(self.send(k).to_s, @files)
             end
             exps
           end
@@ -79,7 +79,7 @@ module Nova
           define_method(:test_expressions) do
             exps = {}
             keys.each do |k|
-              exps[k] = Nova::TestExpression.new(self.send(k).to_s.truncated.strip.downcase)
+              exps[k] = Nova::TestExpression.new(self.send(k).to_s)
             end
             exps
           end

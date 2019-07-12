@@ -22,7 +22,7 @@ module Nova
           else
             []
           end
-        end.flatten.uniq
+        end.flatten.uniq.compact
       end
 
       def enemies_govts
@@ -32,7 +32,7 @@ module Nova
           else
             []
           end
-        end.flatten.uniq
+        end.flatten.uniq.compact
       end
 
       def hail_str_id

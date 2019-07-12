@@ -6,7 +6,9 @@ module EvnToEs
           nova.traverse(:outf) do |id, name, outf|
             outf.print_debug if self.conv.verbose #[:mod_type, :mod_val, :availability, :on_purchase, :on_sale])
 
-            unless outf.unsupported
+            if outf.unsupported
+              puts "WARN outfit #{outf.id} #{outf.name} unsupported"
+            else
               weap = nil
               cat = nil
               case outf.mod_type
@@ -82,7 +84,6 @@ module EvnToEs
                 end
 
                 outf.mods.each do |mod|
-
                   if mod.type != Nova::Record::Outf::None
                     entry "cargo space", mod.val if mod.type == Nova::Record::Outf::MoreCargoSpace
                     entry "shields", mod.val if mod.type == Nova::Record::Outf::MoreShieldCapacity
@@ -234,18 +235,29 @@ module EvnToEs
 
                         # EV: The number of frames it takes for one of this weapon to reload. 30 = 1
                         # shot/sec. Smaller numbers yield faster reloads.
+                        # ES: how many frames this weapon takes to reload: 1 means it fires every
+                        # turn (e.g. most beam weapons), and 60 means it fires once per second.
                         entry "reload", weap.reload * 2
                         # EV: The number of frames the weapon's shots travel for before they peter out.
                         # 30 = 1 second of life.
+                        # ES: how long the projectile lasts before it "dies."
                         entry "lifetime", weap.count_ * 2
                         # EV: The weapon's speed (pixels per frame * 100).
+                        # ES: initial velocity of the projectile, relative to whatever fired it (which may be
+                        # a ship or a "parent" projectile of which this is a submunition).
                         entry "velocity", (weap.speed / 100.0).round if weap.speed > 0
 
-                        entry "shield damage", weap.energy_dmg
-                        entry "hull damage", weap.mass_dmg
+                        entry "shield damage", weap.energy_dmg/2
+                        entry "hull damage", weap.mass_dmg/2
 
                         entry "blast radius", weap.blast_radius if weap.blast_radius > 0
                         entry "trigger radius", weap.prox_radius if weap.prox_radius > 0
+                        # EV: The magnitude of the impact when the shot hits something.
+                        # This amount of impact, which is inversely proportional to the ship's mass.
+                        # (e.g. Missile = 30).
+                        # ES: how much thrust is applied to a ship when this projectile strikes it.
+                        # If this is negative, the ship is pulled towards the projectile.
+                        # Hit force associated with blast damage is also scaled.
                         entry "hit force", weap.impact if weap.impact > 0
                         entry "turret turn", 2.0 if cat == "Turrets"
 
@@ -259,7 +271,7 @@ module EvnToEs
                         # ES does not support outfit that are both turret AND anti-missile
                         if (weap.guidance == Nova::Record::Weap::PointDefenseTurret or weap.guidance == Nova::Record::Weap::PointDefenseBeam) and
                             !outf.flags_match(Nova::Record::Outf::ItemIsTurret)
-                          entry "anti-missile", weap.mass_dmg * 2
+                          entry "anti-missile", weap.mass_dmg * 4
                         end
 
                         entry :inaccuracy, weap.inaccuracy / 2
@@ -269,7 +281,7 @@ module EvnToEs
                 end
 
                 if outf.desc_id > 0
-                  entry :description, EvnToEs::Description.new(nova, outf.desc_id)
+                  entry :description, EvnToEs::Description.new(nova, outf.desc_id, initial: true)
                 end
 
               end

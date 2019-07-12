@@ -100,7 +100,11 @@ module EvnToEs
               if pers.syst
                 case pers.syst.first
                 when :system
-                  entry :system, pers.syst.last.uniq_name
+                  if pers.syst.last
+                    entry :system, pers.syst.last.uniq_name
+                  else
+                    puts "ERROR syst not found #{pers.id} #{pers.name}"
+                  end
                 when :government, :government_ally
                   entry :system do
                     entry :government, pers.syst.last.uniq_name

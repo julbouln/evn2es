@@ -8,7 +8,7 @@ module EvnToEs
 
       def convert(nova)
         
-        if true
+        if false
           nova.test_tree.each do |op, vals|
             puts "TEST #{op}: #{vals}"
           end

@@ -65,7 +65,7 @@ module EvnToEs
                 end
 
                 cron.news_govt.each do |govt|
-                  if govt
+                  if govt and govt.news_str_id > 0
                     news_str = nova.get_str(govt.news_str_id)
                     news_name = news_str.first.match(/^News/) ? news_str.first.gsub(/([^\:]+)\:.*/, '\1') : "News"
                     #news_name = nova.resources[Nova::Type::STR][govt.news_str_id][:name]
@@ -146,21 +146,23 @@ module EvnToEs
             shipyards = {}
             systs = []
 
+            #puts "TEST #{int} #{ops}"
+
             exp = EvnToEs::TestExpression.new(int)
 
             ini_exp = EvnToEs::TestExpression.new(int)
             ini_exp.set_initial_conditions!
 
             if false
-            puts "EVENT #{name} #{int} -> #{exp.to_s}"
-            exp.interpretation.each do |i|
-              if i.is_a? Array
-                if i.first == :not
-                  clr = "!#{i.last}"
-                  puts "#{clr}: #{nova.set_tree[clr]}"
+              puts "EVENT #{name} #{int} -> #{exp.to_s}"
+              exp.interpretation.each do |i|
+                if i.is_a? Array
+                  if i.first == :not
+                    clr = "!#{i.last}"
+                    puts "#{clr}: #{nova.set_tree[clr]}"
+                  end
                 end
               end
-            end
             end
 
             unless ini_exp.resolve_to_true
