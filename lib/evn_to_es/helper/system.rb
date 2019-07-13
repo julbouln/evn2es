@@ -118,14 +118,14 @@ module EvnToEs
             case flet.syst.first
             when :system
               if flet.syst.last.id == syst.id
-                entry :fleet, fname_ex, 1500
+                entry :fleet, fname_ex, 2500
               end
             when :government
               if syst.govt and flet.syst.last and flet.syst.last.id == syst.govt.id
-                entry :fleet, fname_ex, 2500
+                entry :fleet, fname_ex, 3500
               end
             when :any_system
-              entry :fleet, fname_ex, 3000
+              entry :fleet, fname_ex, 4000
             end
           end
 

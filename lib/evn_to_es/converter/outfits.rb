@@ -148,6 +148,11 @@ module EvnToEs
                       entry "#{outf.uniq_name.downcase} capacity", -1
                     end
 
+                    # EV: For ammo-using weapons, this is the maximum amount of ammo per each
+                    # instance of this weapon. (so, if you have two of these weapons, the max
+                    # amount of ammo for that weapon type would actually be twice MaxAmmo,
+                    # and so on) Set to 0 or -1 if you want the ammo quantity to be constrained
+                    # by the oütf resource's Max field instead.
                     if weap and weap.ammo_type
                       if weap.max_ammo > 0
                         entry "#{weap.ammo_type.ammo_outf.uniq_name.downcase} capacity", weap.max_ammo
@@ -163,14 +168,6 @@ module EvnToEs
                     if mod.type == Nova::Record::Outf::Weapon
                       weap = mod.record
                       weap.print_debug if self.conv.verbose
-
-                      if [Nova::Record::Weap::TurretedBeam, Nova::Record::Weap::TurretedUnguided,
-                          Nova::Record::Weap::FrontQuadrantTurret, Nova::Record::Weap::RearQuadrantTurret,
-                          Nova::Record::Weap::PointDefenseTurret].include?(weap.guidance)
-                        #entry "turret mounts", -1
-                      else
-                        #entry "gun ports", -1
-                      end
 
                       if outf.flags_match(Nova::Record::Outf::ItemIsTurret)
                         entry "turret mounts", -1

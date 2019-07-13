@@ -35,8 +35,6 @@ module EvnToEs
               end
             end
             conf.write(file)
-
-
           end
 
           nova.traverse(:cron) do |id, name, cron|
@@ -146,8 +144,6 @@ module EvnToEs
             shipyards = {}
             systs = []
 
-            #puts "TEST #{int} #{ops}"
-
             exp = EvnToEs::TestExpression.new(int)
 
             ini_exp = EvnToEs::TestExpression.new(int)
@@ -195,21 +191,24 @@ module EvnToEs
                     shipyards[tech] ||= []
                     shipyards[tech] << obj.uniq_name
                   when :appear_on
+                    # TODO
                   end
                 when :syst
                   systs << obj
                 when :flet
                   # TODO
-                  #puts "FLEET MOD EVENT : #{obj.uniq_name} #{obj.syst.first}"
+                  #puts "FLEET EVENT : #{t} #{obj.uniq_name} #{obj.syst}"
                 when :pers
-                  # TODO
+                  # UNSUPPORTED
+                  # puts "PERS EVENT : #{t} #{obj.uniq_name}"
                 when :oops
-                  # TODO
+                  # NEVER HAPPEN
+                  # puts "OOPS EVENT : #{t} #{obj.uniq_name}"
                 end
               end
 
               conf = self.generate_config :event, "#{name} trigger" do
-                if outfitters.length > 0 or shipyards.length > 0
+                if outfitters.length > 0 or shipyards.length > 0 or systs.length > 0
                   outfitters.each do |tech, outfits|
                     entry :outfitter, tech do
                       outfits.each do |outfit|
@@ -224,20 +223,22 @@ module EvnToEs
                       end
                     end
                   end
-                end
-
-                systs.each do |syst|
-                  syst.navs.each do |nav|
-                    if nav and !nav.unsupported
-                      entry :planet, nav.shared_name do
-                        insert self.convert_spob(nova, nav)
+                  systs.each do |syst|
+                    syst.navs.each do |nav|
+                      if nav and !nav.unsupported
+                        entry :planet, nav.shared_name do
+                          insert self.convert_spob(nova, nav)
+                        end
                       end
                     end
+                    entry :system, syst.shared_name do
+                      insert self.convert_syst(nova, syst)
+                    end
                   end
-                  entry :system, syst.shared_name do
-                    insert self.convert_syst(nova, syst)
-                  end
+                else
+                  #puts "WARN empty event trigger #{name} #{ops}"
                 end
+
               end
               conf.write(file)
               i += 1

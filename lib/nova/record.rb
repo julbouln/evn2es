@@ -202,6 +202,14 @@ module Nova
           false
         end
 
+        def to_s
+          "#{self.class.name}<id: #{@id}, name: #{@name}>"
+        end
+
+        def inspect
+          "#{self.class.name}<id: #{@id}, name: #{@name}, #{@raw.to_s}>"
+        end
+
       end
 
       Record.const_set const, c

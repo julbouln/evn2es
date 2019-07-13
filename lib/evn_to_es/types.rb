@@ -249,6 +249,10 @@ module EvnToEs
       @exp = Nova::SetExpression.new(exp, files)
     end
 
+    def to_s
+      @exp.to_s
+    end
+
     def write(io, level = 0)
       @exp.interpretation.each do |int|
         case int[0]
@@ -299,20 +303,9 @@ module EvnToEs
         end
       end
     end
-
   end
 
-
-  class SetExpressionEvent
-    def endline
-      true
-    end
-
-    def initialize(exp, files)
-      @files = files
-      @exp = Nova::SetExpression.new(exp, files)
-    end
-
+  class SetExpressionEvent < SetExpression
     def write(io, level = 0)
       @exp.interpretation.each do |int|
         case int[0]

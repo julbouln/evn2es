@@ -7,7 +7,9 @@ module EvnToEs
       def convert(nova)
         File.open(conv.data_export_path("planets.txt"), 'w') do |file|
           nova.traverse(:spob) do |id, name, spob|
-            unless spob.unsupported
+            if spob.unsupported
+              puts "WARN spob #{id} #{name} unsupported"
+            else
               spob.print_debug if self.conv.verbose
               conf = self.convert_spob(nova, spob)
               conf.write(file)
