@@ -17,6 +17,11 @@ module EvnToEs
               entry :neighbor, :system, pos.last.shared_name
               entry :distance, 3 if key != :source
             end
+          when :any_government
+            entry key do
+              entry :not, :government, "Uninhabited"
+              entry :distance, 3 if key != :source
+            end
           when :government
             entry key do
               entry :government, pos.last.uniq_name
@@ -256,7 +261,6 @@ module EvnToEs
                 end
 
                 if misn.aux_ship_dude
-
                   entry :npc do
                     npc_syst = misn.resolve_aux_ship_syst
                     case npc_syst.first
@@ -309,11 +313,24 @@ module EvnToEs
                       entry :require, misn.avail_ship.uniq_name
                     end
 
+                    accept_label = nil
+                    if misn.brief_text > 0
+                      accept_label = EvnToEs::Conversation.new(nova, misn.brief_text, stopover_type: stopover_type)
+                    else
+                      if misn.load_carg_text > 0 and misn.pickup_mode == Nova::Record::Misn::PickupAtMissionStart
+                        accept_label = EvnToEs::Conversation.new(nova, misn.load_carg_text, stopover_type: stopover_type)
+                      end
+                    end
+
                     entry :conversation do
                       entry EvnToEs::Conversation.new(nova, misn.desc_id, stopover_type: stopover_type)
                       entry :choice do
                         entry EvnToEs::ConversationLine.new(accept) do
-                          entry :goto, :accept
+                          if accept_label
+                            entry :goto, :accept
+                          else
+                            entry :accept
+                          end
                         end
                         entry EvnToEs::ConversationLine.new(refuse) do
                           if misn.refuse_text <= 0
@@ -327,20 +344,10 @@ module EvnToEs
                         end
                       end
 
-                      entry :label, :accept
-                      if misn.brief_text > 0
-                        entry EvnToEs::Conversation.new(nova, misn.brief_text, stopover_type: stopover_type) do
+                      if accept_label
+                        entry :label, :accept
+                        entry accept_label do
                           entry :accept
-                        end
-                      else
-                        if misn.load_carg_text > 0 and misn.pickup_mode == Nova::Record::Misn::PickupAtMissionStart
-                          entry EvnToEs::Conversation.new(nova, misn.load_carg_text, stopover_type: stopover_type) do
-                            entry :accept
-                          end
-                        else
-                          entry EvnToEs::ConversationLine.new("___") do
-                            entry :accept
-                          end
                         end
                       end
                     end
@@ -348,16 +355,21 @@ module EvnToEs
                 end
 
                 entry :on, :accept do
+                  if misn.ship_dude and misn.ship_dude.govt and misn.ship_behav == Nova::Record::Misn::ShipBehaveAlwaysAttack
+                    entry "reputation: #{misn.ship_dude.govt.uniq_name}", :"-=", 4
+                  end
+
                   # accept mission from this govt will reduce his ennemies player reputation
                   if misn.comp_govt
                     misn.comp_govt.enemies_govts.each do |ennemy|
                       if misn.comp_reward > 0
-                        entry "reputation: #{ennemy.uniq_name}", :"-=", misn.comp_reward
+                        entry "reputation: #{ennemy.uniq_name}", :"-=", 2
                       else
-                        entry "reputation: #{ennemy.uniq_name}", :"+=", misn.comp_reward.abs
+                        entry "reputation: #{ennemy.uniq_name}", :"+=", 2
                       end
                     end
                   end
+
                   if misn.on_accept.to_s.truncated.strip.length > 0
                     entry EvnToEs::SetExpression.new(misn.on_accept.to_s, nova)
                   end
@@ -392,7 +404,7 @@ module EvnToEs
                   if misn.pay_val > 0
                     entry :payment, misn.pay_val
                   end
-                  if misn.comp_govt
+                  if misn.comp_govt and misn.comp_reward != 0
                     if misn.comp_reward > 0
                       entry "reputation: #{misn.comp_govt.uniq_name}", :"+=", misn.comp_reward
                     else
@@ -433,10 +445,10 @@ module EvnToEs
 
                 entry :on, :fail do
                   if misn.comp_govt
-                    if misn.comp_reward > 0
-                      entry "reputation: #{misn.comp_govt.uniq_name}", :"-=", misn.comp_reward / 2.0
+                    if misn.comp_reward > 0 and misn.comp_reward != 0
+                      entry "reputation: #{misn.comp_govt.uniq_name}", :"-=", misn.comp_reward / 2
                     else
-                      entry "reputation: #{misn.comp_govt.uniq_name}", :"+=", misn.comp_reward.abs / 2.0
+                      entry "reputation: #{misn.comp_govt.uniq_name}", :"+=", misn.comp_reward.abs / 2
                     end
                   end
 

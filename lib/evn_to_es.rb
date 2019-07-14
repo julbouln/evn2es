@@ -152,7 +152,7 @@ module EvnToEs
 
       conv_objects.sort {|a, b| a.priority <=> b.priority}.each do |conv|
         if conv
-          puts "Convert #{conv.class.name}" if @verbose
+          puts "Convert #{conv.class.name}"
           conv.convert(@files)
         end
       end

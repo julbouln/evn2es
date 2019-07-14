@@ -11,9 +11,9 @@ module EvnToEs
       else
         sub_desc.gsub!(/\<DST\> in the \<DSY\> system/, "<destination>")
         sub_desc.gsub!(/\<DST\>/, "<planet>")
+        sub_desc.gsub!(/\<DSY\>/, "<system>") # The name of the destination system.
       end
 
-#      sub_desc.gsub!(/\<DSY\>/, "<stopovers>") # The name of the destination system.
       sub_desc.gsub!(/\<RST\> in the \<RSY\> system/, "<destination>") # The name of the return system.
 
       sub_desc.gsub!(/\<RSY\>/, "<system>") # The name of the return system.
@@ -102,7 +102,7 @@ module EvnToEs
       @desc = files.get_desc(desc_id)
       @options = options
       unless @desc
-        puts "WARN desc #{desc_id} NOT FOUND"
+        #puts "WARN desc #{desc_id} NOT FOUND"
         @desc = ""
       end
     end

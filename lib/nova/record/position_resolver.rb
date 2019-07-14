@@ -4,12 +4,14 @@ module Nova
 
       def resolve_stel(id)
         case id
-        when -1
+        when -1, 127
           [:no_specific_stellar, nil]
         when 128..2175
           [:stellar, @files.get(:spob, id)]
         when 5000..7047
           [:adj_system, @files.get(:syst, id - 5000 + 128)]
+        when 9999
+          [:any_government, nil]
         when 10000..10255
           [:government, @files.get(:govt, id - 10000 + 128)]
         when 15000..15255
@@ -30,12 +32,14 @@ module Nova
 
       def resolve_syst(id)
         case id
-        when -1
+        when -1, 127
           [:any_system, nil]
         when 128..2175
           [:system, @files.get(:syst, id)]
         when 5000..7047
           [:adj_system, @files.get(:syst, id - 5000 + 128)]
+        when 9999
+          [:any_government, nil]
         when 10000..10255
           [:government, @files.get(:govt, id - 10000 + 128)]
         when 15000..15255

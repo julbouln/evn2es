@@ -1,10 +1,13 @@
 evn2es :
 - fix bug in some PICT conversion
-- asteroids
+- minable asteroids
 - cargo sprites
 - ship variants support
 - balance weapons/outfits
 - interface
+
+- what to do with 9999 stel ?
+- we can only have and licenses
 
 Endless Sky missing fonctionnality/required patches :
 Interface:
