@@ -113,7 +113,7 @@ module EvnToEs
                   entry :automaton, 1
                 end
 
-                entry :bunks, ship.crew
+                entry :bunks, ship.crew + ship.max_tur
 
                 # ES Heavy Shuttle
                 # "mass" 110
