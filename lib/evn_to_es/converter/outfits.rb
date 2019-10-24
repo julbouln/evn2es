@@ -63,7 +63,7 @@ module EvnToEs
                 entry :plural, outf.lc_plural.to_s.truncated
                 entry :thumbnail, self.conv.convert_pict(outf.pict_id, "outfit", "-resize 180x")
                 entry :category, cat
-                entry :mass, 0 #outf.mass if outf.mass != 0
+                entry :mass, outf.mass if outf.mass != 0
                 entry "outfit space", -outf.mass if outf.mass != 0
 
                 entry :cost, outf.cost
