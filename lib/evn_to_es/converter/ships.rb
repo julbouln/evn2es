@@ -30,7 +30,7 @@ module EvnToEs
               if ship.shan
                 if self.conv.patched
                   entry :sprite, self.conv.convert_rled_frames(ship.shan.base_image_id, 0, ship.shan.frames_per - 1, "ship", "-resize 200%") do
-                    entry "pre rendered rotation", ship.shan.frames_per.to_i
+                    entry "pre-rendered rotation", ship.shan.frames_per.to_i
                   end
                 else
                   entry :sprite, conv.convert_rled(ship.shan.base_image_id, ship.shan.frames_per / 2, "ship", "-rotate \"180\" -resize 200%")
@@ -178,7 +178,7 @@ module EvnToEs
                   if ship.shan.glow_image_id > -1
                     if self.conv.patched
                       entry "flare sprite", conv.convert_rled_frames(ship.shan.glow_image_id, 0, ship.shan.frames_per - 1, "flare", "-resize 200%") do
-                        entry "pre rendered rotation", ship.shan.frames_per.to_i
+                        entry "pre-rendered rotation", ship.shan.frames_per.to_i
                       end
                     else
                       entry "flare sprite", conv.convert_rled(ship.shan.glow_image_id, ship.shan.frames_per / 2, "flare", "-rotate \"180\" -resize 200%")
