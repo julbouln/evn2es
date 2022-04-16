@@ -63,7 +63,7 @@ module EvnToEs
                 entry :plural, outf.lc_plural.to_s.truncated
                 entry :thumbnail, self.conv.convert_pict(outf.pict_id, "outfit", "-resize 180x")
                 entry :category, cat
-                entry :mass, 0 #outf.mass if outf.mass != 0
+                entry :mass, outf.mass if outf.mass != 0
                 entry "outfit space", -outf.mass if outf.mass != 0
 
                 entry :cost, outf.cost
@@ -87,10 +87,9 @@ module EvnToEs
                   if mod.type != Nova::Record::Outf::None
                     entry "cargo space", mod.val if mod.type == Nova::Record::Outf::MoreCargoSpace
                     entry "shields", mod.val if mod.type == Nova::Record::Outf::MoreShieldCapacity
-                    # EV: How much to speed up (1000 = one more shield point per frame)
-                    # ES: the number of shield points regenerated per frame. It takes 1 energy to regenerate 1 unit of shields,
-                    # so if your shields are recharging your ship has less energy available for other things.
-                    entry "shield generation", mod.val / 1000.0 if mod.type == Nova::Record::Outf::FasterShieldRecharge
+
+                    #EV recharge is /1000 at 30fps, ES regen is at 60fps or half as much per frame
+                    entry "shield generation", mod.val / 1000.0 / 2.0 if mod.type == Nova::Record::Outf::FasterShieldRecharge
                     entry "hull", mod.val if mod.type == Nova::Record::Outf::Armour
                     entry "thrust", mod.val if mod.type == Nova::Record::Outf::AccelerationBooster
                     entry "drag", -mod.val / 10.0 if mod.type == Nova::Record::Outf::SpeedIncrease

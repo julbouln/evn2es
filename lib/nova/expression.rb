@@ -33,7 +33,7 @@ module Nova
           exp << parse
         when ')'
           break
-        when String, Fixnum, Float, Symbol
+        when String, Integer, Float, Symbol
           exp << @token
         when nil
           break

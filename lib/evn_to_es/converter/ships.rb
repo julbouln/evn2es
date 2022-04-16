@@ -107,13 +107,16 @@ module EvnToEs
 
                 entry :cost, ship.cost
                 entry :shields, ship.shield
+
+                #EV recharge is /1000 at 30fps, ES regen is at 60fps or half as much per frame
+                entry "shield generation", ship.shield_regen / 1000.0 / 2.0
                 entry :hull, ship.armor
                 entry "required crew", ship.crew
                 if ship.crew == 0
                   entry :automaton, 1
                 end
 
-                entry :bunks, ship.crew
+                entry :bunks, ship.crew + ship.max_tur
 
                 # ES Heavy Shuttle
                 # "mass" 110
